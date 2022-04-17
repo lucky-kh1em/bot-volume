@@ -1,27 +1,37 @@
 /**
  *Submitted for verification at BscScan.com on 2021-04-09
-*/
+ */
 
 /**
  *Submitted for verification at BscScan.com on 2020-09-14
-*/
+ */
 
 pragma solidity >=0.5.0;
 
 interface IBakerySwapFactory {
-    event PairCreated(address indexed token0, address indexed token1, address pair, uint256);
+    event PairCreated(
+        address indexed token0,
+        address indexed token1,
+        address pair,
+        uint256
+    );
 
     function feeTo() external view returns (address);
 
     function feeToSetter() external view returns (address);
 
-    function getPair(address tokenA, address tokenB) external view returns (address pair);
+    function getPair(address tokenA, address tokenB)
+        external
+        view
+        returns (address pair);
 
     function allPairs(uint256) external view returns (address pair);
 
     function allPairsLength() external view returns (uint256);
 
-    function createPair(address tokenA, address tokenB) external returns (address pair);
+    function createPair(address tokenA, address tokenB)
+        external
+        returns (address pair);
 
     function setFeeTo(address) external;
 
@@ -36,8 +46,13 @@ library TransferHelper {
         uint256 value
     ) internal {
         // bytes4(keccak256(bytes('approve(address,uint256)')));
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x095ea7b3, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'TransferHelper: APPROVE_FAILED');
+        (bool success, bytes memory data) = token.call(
+            abi.encodeWithSelector(0x095ea7b3, to, value)
+        );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "TransferHelper: APPROVE_FAILED"
+        );
     }
 
     function safeTransfer(
@@ -46,8 +61,13 @@ library TransferHelper {
         uint256 value
     ) internal {
         // bytes4(keccak256(bytes('transfer(address,uint256)')));
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0xa9059cbb, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'TransferHelper: TRANSFER_FAILED');
+        (bool success, bytes memory data) = token.call(
+            abi.encodeWithSelector(0xa9059cbb, to, value)
+        );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "TransferHelper: TRANSFER_FAILED"
+        );
     }
 
     function safeTransferFrom(
@@ -57,13 +77,18 @@ library TransferHelper {
         uint256 value
     ) internal {
         // bytes4(keccak256(bytes('transferFrom(address,address,uint256)')));
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x23b872dd, from, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'TransferHelper: TRANSFER_FROM_FAILED');
+        (bool success, bytes memory data) = token.call(
+            abi.encodeWithSelector(0x23b872dd, from, to, value)
+        );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "TransferHelper: TRANSFER_FROM_FAILED"
+        );
     }
 
     function safeTransferBNB(address to, uint256 value) internal {
         (bool success, ) = to.call{value: value}(new bytes(0));
-        require(success, 'TransferHelper: BNB_TRANSFER_FAILED');
+        require(success, "TransferHelper: BNB_TRANSFER_FAILED");
     }
 }
 
@@ -260,19 +285,31 @@ interface IBakerySwapRouter {
         uint256 reserveOut
     ) external pure returns (uint256 amountIn);
 
-    function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory amounts);
+    function getAmountsOut(uint256 amountIn, address[] calldata path)
+        external
+        view
+        returns (uint256[] memory amounts);
 
-    function getAmountsIn(uint256 amountOut, address[] calldata path) external view returns (uint256[] memory amounts);
+    function getAmountsIn(uint256 amountOut, address[] calldata path)
+        external
+        view
+        returns (uint256[] memory amounts);
 }
 
 library BakerySwapLibrary {
     using SafeMath for uint256;
 
     // returns sorted token addresses, used to handle return values from pairs sorted in this order
-    function sortTokens(address tokenA, address tokenB) internal pure returns (address token0, address token1) {
-        require(tokenA != tokenB, 'BakerySwapLibrary: IDENTICAL_ADDRESSES');
-        (token0, token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
-        require(token0 != address(0), 'BakerySwapLibrary: ZERO_ADDRESS');
+    function sortTokens(address tokenA, address tokenB)
+        internal
+        pure
+        returns (address token0, address token1)
+    {
+        require(tokenA != tokenB, "BakerySwapLibrary: IDENTICAL_ADDRESSES");
+        (token0, token1) = tokenA < tokenB
+            ? (tokenA, tokenB)
+            : (tokenB, tokenA);
+        require(token0 != address(0), "BakerySwapLibrary: ZERO_ADDRESS");
     }
 
     // calculates the CREATE2 address for a pair without making any external calls
@@ -286,10 +323,10 @@ library BakerySwapLibrary {
             uint256(
                 keccak256(
                     abi.encodePacked(
-                        hex'ff',
+                        hex"ff",
                         factory,
                         keccak256(abi.encodePacked(token0, token1)),
-                        hex'e2e87433120e32c4738a7d8f3271f3d872cbe16241d67537139158d90bac61d3' // init code hash
+                        hex"e2e87433120e32c4738a7d8f3271f3d872cbe16241d67537139158d90bac61d3" // init code hash
                     )
                 )
             )
@@ -303,8 +340,12 @@ library BakerySwapLibrary {
         address tokenB
     ) internal view returns (uint256 reserveA, uint256 reserveB) {
         (address token0, ) = sortTokens(tokenA, tokenB);
-        (uint256 reserve0, uint256 reserve1, ) = IBakerySwapPair(pairFor(factory, tokenA, tokenB)).getReserves();
-        (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
+        (uint256 reserve0, uint256 reserve1, ) = IBakerySwapPair(
+            pairFor(factory, tokenA, tokenB)
+        ).getReserves();
+        (reserveA, reserveB) = tokenA == token0
+            ? (reserve0, reserve1)
+            : (reserve1, reserve0);
     }
 
     // given some amount of an asset and pair reserves, returns an equivalent amount of the other asset
@@ -313,8 +354,11 @@ library BakerySwapLibrary {
         uint256 reserveA,
         uint256 reserveB
     ) internal pure returns (uint256 amountB) {
-        require(amountA > 0, 'BakerySwapLibrary: INSUFFICIENT_AMOUNT');
-        require(reserveA > 0 && reserveB > 0, 'BakerySwapLibrary: INSUFFICIENT_LIQUIDITY');
+        require(amountA > 0, "BakerySwapLibrary: INSUFFICIENT_AMOUNT");
+        require(
+            reserveA > 0 && reserveB > 0,
+            "BakerySwapLibrary: INSUFFICIENT_LIQUIDITY"
+        );
         amountB = amountA.mul(reserveB) / reserveA;
     }
 
@@ -324,8 +368,11 @@ library BakerySwapLibrary {
         uint256 reserveIn,
         uint256 reserveOut
     ) internal pure returns (uint256 amountOut) {
-        require(amountIn > 0, 'BakerySwapLibrary: INSUFFICIENT_INPUT_AMOUNT');
-        require(reserveIn > 0 && reserveOut > 0, 'BakerySwapLibrary: INSUFFICIENT_LIQUIDITY');
+        require(amountIn > 0, "BakerySwapLibrary: INSUFFICIENT_INPUT_AMOUNT");
+        require(
+            reserveIn > 0 && reserveOut > 0,
+            "BakerySwapLibrary: INSUFFICIENT_LIQUIDITY"
+        );
         uint256 amountInWithFee = amountIn.mul(997);
         uint256 numerator = amountInWithFee.mul(reserveOut);
         uint256 denominator = reserveIn.mul(1000).add(amountInWithFee);
@@ -338,8 +385,11 @@ library BakerySwapLibrary {
         uint256 reserveIn,
         uint256 reserveOut
     ) internal pure returns (uint256 amountIn) {
-        require(amountOut > 0, 'BakerySwapLibrary: INSUFFICIENT_OUTPUT_AMOUNT');
-        require(reserveIn > 0 && reserveOut > 0, 'BakerySwapLibrary: INSUFFICIENT_LIQUIDITY');
+        require(amountOut > 0, "BakerySwapLibrary: INSUFFICIENT_OUTPUT_AMOUNT");
+        require(
+            reserveIn > 0 && reserveOut > 0,
+            "BakerySwapLibrary: INSUFFICIENT_LIQUIDITY"
+        );
         uint256 numerator = reserveIn.mul(amountOut).mul(1000);
         uint256 denominator = reserveOut.sub(amountOut).mul(997);
         amountIn = (numerator / denominator).add(1);
@@ -351,11 +401,15 @@ library BakerySwapLibrary {
         uint256 amountIn,
         address[] memory path
     ) internal view returns (uint256[] memory amounts) {
-        require(path.length >= 2, 'BakerySwapLibrary: INVALID_PATH');
+        require(path.length >= 2, "BakerySwapLibrary: INVALID_PATH");
         amounts = new uint256[](path.length);
         amounts[0] = amountIn;
         for (uint256 i; i < path.length - 1; i++) {
-            (uint256 reserveIn, uint256 reserveOut) = getReserves(factory, path[i], path[i + 1]);
+            (uint256 reserveIn, uint256 reserveOut) = getReserves(
+                factory,
+                path[i],
+                path[i + 1]
+            );
             amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);
         }
     }
@@ -366,18 +420,26 @@ library BakerySwapLibrary {
         uint256 amountOut,
         address[] memory path
     ) internal view returns (uint256[] memory amounts) {
-        require(path.length >= 2, 'BakerySwapLibrary: INVALID_PATH');
+        require(path.length >= 2, "BakerySwapLibrary: INVALID_PATH");
         amounts = new uint256[](path.length);
         amounts[amounts.length - 1] = amountOut;
         for (uint256 i = path.length - 1; i > 0; i--) {
-            (uint256 reserveIn, uint256 reserveOut) = getReserves(factory, path[i - 1], path[i]);
+            (uint256 reserveIn, uint256 reserveOut) = getReserves(
+                factory,
+                path[i - 1],
+                path[i]
+            );
             amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);
         }
     }
 }
 
 interface IBakerySwapPair {
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     function name() external pure returns (string memory);
@@ -390,7 +452,10 @@ interface IBakerySwapPair {
 
     function balanceOf(address owner) external view returns (uint256);
 
-    function allowance(address owner, address spender) external view returns (uint256);
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256);
 
     function approve(address spender, uint256 value) external returns (bool);
 
@@ -419,7 +484,12 @@ interface IBakerySwapPair {
     ) external;
 
     event Mint(address indexed sender, uint256 amount0, uint256 amount1);
-    event Burn(address indexed sender, uint256 amount0, uint256 amount1, address indexed to);
+    event Burn(
+        address indexed sender,
+        uint256 amount0,
+        uint256 amount1,
+        address indexed to
+    );
     event Swap(
         address indexed sender,
         uint256 amount0In,
@@ -455,7 +525,9 @@ interface IBakerySwapPair {
 
     function mint(address to) external returns (uint256 liquidity);
 
-    function burn(address to) external returns (uint256 amount0, uint256 amount1);
+    function burn(address to)
+        external
+        returns (uint256 amount0, uint256 amount1);
 
     function swap(
         uint256 amount0Out,
@@ -496,7 +568,7 @@ library SafeMath {
      */
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
-        require(c >= a, 'SafeMath: addition overflow');
+        require(c >= a, "SafeMath: addition overflow");
 
         return c;
     }
@@ -512,7 +584,7 @@ library SafeMath {
      * - Subtraction cannot overflow.
      */
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        return sub(a, b, 'SafeMath: subtraction overflow');
+        return sub(a, b, "SafeMath: subtraction overflow");
     }
 
     /**
@@ -555,7 +627,7 @@ library SafeMath {
         }
 
         uint256 c = a * b;
-        require(c / a == b, 'SafeMath: multiplication overflow');
+        require(c / a == b, "SafeMath: multiplication overflow");
 
         return c;
     }
@@ -573,7 +645,7 @@ library SafeMath {
      * - The divisor cannot be zero.
      */
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        return div(a, b, 'SafeMath: division by zero');
+        return div(a, b, "SafeMath: division by zero");
     }
 
     /**
@@ -613,7 +685,7 @@ library SafeMath {
      * - The divisor cannot be zero.
      */
     function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        return mod(a, b, 'SafeMath: modulo by zero');
+        return mod(a, b, "SafeMath: modulo by zero");
     }
 
     /**
@@ -694,7 +766,9 @@ interface IBEP20 {
      *
      * Emits a {Transfer} event.
      */
-    function transfer(address recipient, uint256 amount) external returns (bool);
+    function transfer(address recipient, uint256 amount)
+        external
+        returns (bool);
 
     /**
      * @dev Returns the remaining number of tokens that `spender` will be
@@ -703,7 +777,10 @@ interface IBEP20 {
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(address _owner, address spender) external view returns (uint256);
+    function allowance(address _owner, address spender)
+        external
+        view
+        returns (uint256);
 
     /**
      * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
@@ -748,7 +825,11 @@ interface IBEP20 {
      * @dev Emitted when the allowance of a `spender` for an `owner` is set by
      * a call to {approve}. `value` is the new allowance.
      */
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
 }
 
 interface IWBNB {
@@ -765,7 +846,7 @@ contract BakerySwapRouter is IBakerySwapRouter {
     address public immutable override WBNB;
 
     modifier ensure(uint256 deadline) {
-        require(deadline >= block.timestamp, 'BakerySwapRouter: EXPIRED');
+        require(deadline >= block.timestamp, "BakerySwapRouter: EXPIRED");
         _;
     }
 
@@ -791,18 +872,36 @@ contract BakerySwapRouter is IBakerySwapRouter {
         if (IBakerySwapFactory(factory).getPair(tokenA, tokenB) == address(0)) {
             IBakerySwapFactory(factory).createPair(tokenA, tokenB);
         }
-        (uint256 reserveA, uint256 reserveB) = BakerySwapLibrary.getReserves(factory, tokenA, tokenB);
+        (uint256 reserveA, uint256 reserveB) = BakerySwapLibrary.getReserves(
+            factory,
+            tokenA,
+            tokenB
+        );
         if (reserveA == 0 && reserveB == 0) {
             (amountA, amountB) = (amountADesired, amountBDesired);
         } else {
-            uint256 amountBOptimal = BakerySwapLibrary.quote(amountADesired, reserveA, reserveB);
+            uint256 amountBOptimal = BakerySwapLibrary.quote(
+                amountADesired,
+                reserveA,
+                reserveB
+            );
             if (amountBOptimal <= amountBDesired) {
-                require(amountBOptimal >= amountBMin, 'BakerySwapRouter: INSUFFICIENT_B_AMOUNT');
+                require(
+                    amountBOptimal >= amountBMin,
+                    "BakerySwapRouter: INSUFFICIENT_B_AMOUNT"
+                );
                 (amountA, amountB) = (amountADesired, amountBOptimal);
             } else {
-                uint256 amountAOptimal = BakerySwapLibrary.quote(amountBDesired, reserveB, reserveA);
+                uint256 amountAOptimal = BakerySwapLibrary.quote(
+                    amountBDesired,
+                    reserveB,
+                    reserveA
+                );
                 assert(amountAOptimal <= amountADesired);
-                require(amountAOptimal >= amountAMin, 'BakerySwapRouter: INSUFFICIENT_A_AMOUNT');
+                require(
+                    amountAOptimal >= amountAMin,
+                    "BakerySwapRouter: INSUFFICIENT_A_AMOUNT"
+                );
                 (amountA, amountB) = (amountAOptimal, amountBDesired);
             }
         }
@@ -828,7 +927,14 @@ contract BakerySwapRouter is IBakerySwapRouter {
             uint256 liquidity
         )
     {
-        (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
+        (amountA, amountB) = _addLiquidity(
+            tokenA,
+            tokenB,
+            amountADesired,
+            amountBDesired,
+            amountAMin,
+            amountBMin
+        );
         address pair = BakerySwapLibrary.pairFor(factory, tokenA, tokenB);
         TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
         TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
@@ -844,9 +950,9 @@ contract BakerySwapRouter is IBakerySwapRouter {
         uint256 deadline
     )
         external
+        payable
         virtual
         override
-        payable
         ensure(deadline)
         returns (
             uint256 amountToken,
@@ -868,7 +974,8 @@ contract BakerySwapRouter is IBakerySwapRouter {
         assert(IWBNB(WBNB).transfer(pair, amountBNB));
         liquidity = IBakerySwapPair(pair).mint(to);
         // refund dust bnb, if any
-        if (msg.value > amountBNB) TransferHelper.safeTransferBNB(msg.sender, msg.value - amountBNB);
+        if (msg.value > amountBNB)
+            TransferHelper.safeTransferBNB(msg.sender, msg.value - amountBNB);
     }
 
     // **** REMOVE LIQUIDITY ****
@@ -880,14 +987,28 @@ contract BakerySwapRouter is IBakerySwapRouter {
         uint256 amountBMin,
         address to,
         uint256 deadline
-    ) public virtual override ensure(deadline) returns (uint256 amountA, uint256 amountB) {
+    )
+        public
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256 amountA, uint256 amountB)
+    {
         address pair = BakerySwapLibrary.pairFor(factory, tokenA, tokenB);
         IBakerySwapPair(pair).transferFrom(msg.sender, pair, liquidity); // send liquidity to pair
         (uint256 amount0, uint256 amount1) = IBakerySwapPair(pair).burn(to);
         (address token0, ) = BakerySwapLibrary.sortTokens(tokenA, tokenB);
-        (amountA, amountB) = tokenA == token0 ? (amount0, amount1) : (amount1, amount0);
-        require(amountA >= amountAMin, 'BakerySwapRouter: INSUFFICIENT_A_AMOUNT');
-        require(amountB >= amountBMin, 'BakerySwapRouter: INSUFFICIENT_B_AMOUNT');
+        (amountA, amountB) = tokenA == token0
+            ? (amount0, amount1)
+            : (amount1, amount0);
+        require(
+            amountA >= amountAMin,
+            "BakerySwapRouter: INSUFFICIENT_A_AMOUNT"
+        );
+        require(
+            amountB >= amountBMin,
+            "BakerySwapRouter: INSUFFICIENT_B_AMOUNT"
+        );
     }
 
     function removeLiquidityBNB(
@@ -897,7 +1018,13 @@ contract BakerySwapRouter is IBakerySwapRouter {
         uint256 amountBNBMin,
         address to,
         uint256 deadline
-    ) public virtual override ensure(deadline) returns (uint256 amountToken, uint256 amountBNB) {
+    )
+        public
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256 amountToken, uint256 amountBNB)
+    {
         (amountToken, amountBNB) = removeLiquidity(
             token,
             WBNB,
@@ -927,8 +1054,24 @@ contract BakerySwapRouter is IBakerySwapRouter {
     ) external virtual override returns (uint256 amountA, uint256 amountB) {
         address pair = BakerySwapLibrary.pairFor(factory, tokenA, tokenB);
         uint256 value = approveMax ? uint256(-1) : liquidity;
-        IBakerySwapPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
-        (amountA, amountB) = removeLiquidity(tokenA, tokenB, liquidity, amountAMin, amountBMin, to, deadline);
+        IBakerySwapPair(pair).permit(
+            msg.sender,
+            address(this),
+            value,
+            deadline,
+            v,
+            r,
+            s
+        );
+        (amountA, amountB) = removeLiquidity(
+            tokenA,
+            tokenB,
+            liquidity,
+            amountAMin,
+            amountBMin,
+            to,
+            deadline
+        );
     }
 
     function removeLiquidityBNBWithPermit(
@@ -942,11 +1085,31 @@ contract BakerySwapRouter is IBakerySwapRouter {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external virtual override returns (uint256 amountToken, uint256 amountBNB) {
+    )
+        external
+        virtual
+        override
+        returns (uint256 amountToken, uint256 amountBNB)
+    {
         address pair = BakerySwapLibrary.pairFor(factory, token, WBNB);
         uint256 value = approveMax ? uint256(-1) : liquidity;
-        IBakerySwapPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
-        (amountToken, amountBNB) = removeLiquidityBNB(token, liquidity, amountTokenMin, amountBNBMin, to, deadline);
+        IBakerySwapPair(pair).permit(
+            msg.sender,
+            address(this),
+            value,
+            deadline,
+            v,
+            r,
+            s
+        );
+        (amountToken, amountBNB) = removeLiquidityBNB(
+            token,
+            liquidity,
+            amountTokenMin,
+            amountBNBMin,
+            to,
+            deadline
+        );
     }
 
     // **** REMOVE LIQUIDITY (supporting fee-on-transfer tokens) ****
@@ -958,8 +1121,20 @@ contract BakerySwapRouter is IBakerySwapRouter {
         address to,
         uint256 deadline
     ) public virtual override ensure(deadline) returns (uint256 amountBNB) {
-        (, amountBNB) = removeLiquidity(token, WBNB, liquidity, amountTokenMin, amountBNBMin, address(this), deadline);
-        TransferHelper.safeTransfer(token, to, IBEP20(token).balanceOf(address(this)));
+        (, amountBNB) = removeLiquidity(
+            token,
+            WBNB,
+            liquidity,
+            amountTokenMin,
+            amountBNBMin,
+            address(this),
+            deadline
+        );
+        TransferHelper.safeTransfer(
+            token,
+            to,
+            IBEP20(token).balanceOf(address(this))
+        );
         IWBNB(WBNB).withdraw(amountBNB);
         TransferHelper.safeTransferBNB(to, amountBNB);
     }
@@ -978,7 +1153,15 @@ contract BakerySwapRouter is IBakerySwapRouter {
     ) external virtual override returns (uint256 amountBNB) {
         address pair = BakerySwapLibrary.pairFor(factory, token, WBNB);
         uint256 value = approveMax ? uint256(-1) : liquidity;
-        IBakerySwapPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
+        IBakerySwapPair(pair).permit(
+            msg.sender,
+            address(this),
+            value,
+            deadline,
+            v,
+            r,
+            s
+        );
         amountBNB = removeLiquidityBNBSupportingFeeOnTransferTokens(
             token,
             liquidity,
@@ -1003,8 +1186,11 @@ contract BakerySwapRouter is IBakerySwapRouter {
             (uint256 amount0Out, uint256 amount1Out) = input == token0
                 ? (uint256(0), amountOut)
                 : (amountOut, uint256(0));
-            address to = i < path.length - 2 ? BakerySwapLibrary.pairFor(factory, output, path[i + 2]) : _to;
-            IBakerySwapPair(BakerySwapLibrary.pairFor(factory, input, output)).swap(amount0Out, amount1Out, to);
+            address to = i < path.length - 2
+                ? BakerySwapLibrary.pairFor(factory, output, path[i + 2])
+                : _to;
+            IBakerySwapPair(BakerySwapLibrary.pairFor(factory, input, output))
+                .swap(amount0Out, amount1Out, to);
         }
     }
 
@@ -1014,9 +1200,18 @@ contract BakerySwapRouter is IBakerySwapRouter {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external virtual override ensure(deadline) returns (uint256[] memory amounts) {
+    )
+        external
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
         amounts = BakerySwapLibrary.getAmountsOut(factory, amountIn, path);
-        require(amounts[amounts.length - 1] >= amountOutMin, 'BakerySwapRouter: INSUFFICIENT_OUTPUT_AMOUNT');
+        require(
+            amounts[amounts.length - 1] >= amountOutMin,
+            "BakerySwapRouter: INSUFFICIENT_OUTPUT_AMOUNT"
+        );
         TransferHelper.safeTransferFrom(
             path[0],
             msg.sender,
@@ -1032,9 +1227,18 @@ contract BakerySwapRouter is IBakerySwapRouter {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external virtual override ensure(deadline) returns (uint256[] memory amounts) {
+    )
+        external
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
         amounts = BakerySwapLibrary.getAmountsIn(factory, amountOut, path);
-        require(amounts[0] <= amountInMax, 'BakerySwapRouter: EXCESSIVE_INPUT_AMOUNT');
+        require(
+            amounts[0] <= amountInMax,
+            "BakerySwapRouter: EXCESSIVE_INPUT_AMOUNT"
+        );
         TransferHelper.safeTransferFrom(
             path[0],
             msg.sender,
@@ -1049,12 +1253,27 @@ contract BakerySwapRouter is IBakerySwapRouter {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external virtual override payable ensure(deadline) returns (uint256[] memory amounts) {
-        require(path[0] == WBNB, 'BakerySwapRouter: INVALID_PATH');
+    )
+        external
+        payable
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
+        require(path[0] == WBNB, "BakerySwapRouter: INVALID_PATH");
         amounts = BakerySwapLibrary.getAmountsOut(factory, msg.value, path);
-        require(amounts[amounts.length - 1] >= amountOutMin, 'BakerySwapRouter: INSUFFICIENT_OUTPUT_AMOUNT');
+        require(
+            amounts[amounts.length - 1] >= amountOutMin,
+            "BakerySwapRouter: INSUFFICIENT_OUTPUT_AMOUNT"
+        );
         IWBNB(WBNB).deposit{value: amounts[0]}();
-        assert(IWBNB(WBNB).transfer(BakerySwapLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
+        assert(
+            IWBNB(WBNB).transfer(
+                BakerySwapLibrary.pairFor(factory, path[0], path[1]),
+                amounts[0]
+            )
+        );
         _swap(amounts, path, to);
     }
 
@@ -1064,10 +1283,22 @@ contract BakerySwapRouter is IBakerySwapRouter {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external virtual override ensure(deadline) returns (uint256[] memory amounts) {
-        require(path[path.length - 1] == WBNB, 'BakerySwapRouter: INVALID_PATH');
+    )
+        external
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
+        require(
+            path[path.length - 1] == WBNB,
+            "BakerySwapRouter: INVALID_PATH"
+        );
         amounts = BakerySwapLibrary.getAmountsIn(factory, amountOut, path);
-        require(amounts[0] <= amountInMax, 'BakerySwapRouter: EXCESSIVE_INPUT_AMOUNT');
+        require(
+            amounts[0] <= amountInMax,
+            "BakerySwapRouter: EXCESSIVE_INPUT_AMOUNT"
+        );
         TransferHelper.safeTransferFrom(
             path[0],
             msg.sender,
@@ -1085,10 +1316,22 @@ contract BakerySwapRouter is IBakerySwapRouter {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external virtual override ensure(deadline) returns (uint256[] memory amounts) {
-        require(path[path.length - 1] == WBNB, 'BakerySwapRouter: INVALID_PATH');
+    )
+        external
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
+        require(
+            path[path.length - 1] == WBNB,
+            "BakerySwapRouter: INVALID_PATH"
+        );
         amounts = BakerySwapLibrary.getAmountsOut(factory, amountIn, path);
-        require(amounts[amounts.length - 1] >= amountOutMin, 'BakerySwapRouter: INSUFFICIENT_OUTPUT_AMOUNT');
+        require(
+            amounts[amounts.length - 1] >= amountOutMin,
+            "BakerySwapRouter: INSUFFICIENT_OUTPUT_AMOUNT"
+        );
         TransferHelper.safeTransferFrom(
             path[0],
             msg.sender,
@@ -1105,24 +1348,45 @@ contract BakerySwapRouter is IBakerySwapRouter {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external virtual override payable ensure(deadline) returns (uint256[] memory amounts) {
-        require(path[0] == WBNB, 'BakerySwapRouter: INVALID_PATH');
+    )
+        external
+        payable
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
+        require(path[0] == WBNB, "BakerySwapRouter: INVALID_PATH");
         amounts = BakerySwapLibrary.getAmountsIn(factory, amountOut, path);
-        require(amounts[0] <= msg.value, 'BakerySwapRouter: EXCESSIVE_INPUT_AMOUNT');
+        require(
+            amounts[0] <= msg.value,
+            "BakerySwapRouter: EXCESSIVE_INPUT_AMOUNT"
+        );
         IWBNB(WBNB).deposit{value: amounts[0]}();
-        assert(IWBNB(WBNB).transfer(BakerySwapLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
+        assert(
+            IWBNB(WBNB).transfer(
+                BakerySwapLibrary.pairFor(factory, path[0], path[1]),
+                amounts[0]
+            )
+        );
         _swap(amounts, path, to);
         // refund dust bnb, if any
-        if (msg.value > amounts[0]) TransferHelper.safeTransferBNB(msg.sender, msg.value - amounts[0]);
+        if (msg.value > amounts[0])
+            TransferHelper.safeTransferBNB(msg.sender, msg.value - amounts[0]);
     }
 
     // **** SWAP (supporting fee-on-transfer tokens) ****
     // requires the initial amount to have already been sent to the first pair
-    function _swapSupportingFeeOnTransferTokens(address[] memory path, address _to) internal virtual {
+    function _swapSupportingFeeOnTransferTokens(
+        address[] memory path,
+        address _to
+    ) internal virtual {
         for (uint256 i; i < path.length - 1; i++) {
             (address input, address output) = (path[i], path[i + 1]);
             (address token0, ) = BakerySwapLibrary.sortTokens(input, output);
-            IBakerySwapPair pair = IBakerySwapPair(BakerySwapLibrary.pairFor(factory, input, output));
+            IBakerySwapPair pair = IBakerySwapPair(
+                BakerySwapLibrary.pairFor(factory, input, output)
+            );
             uint256 amountInput;
             uint256 amountOutput;
             {
@@ -1131,13 +1395,21 @@ contract BakerySwapRouter is IBakerySwapRouter {
                 (uint256 reserveInput, uint256 reserveOutput) = input == token0
                     ? (reserve0, reserve1)
                     : (reserve1, reserve0);
-                amountInput = IBEP20(input).balanceOf(address(pair)).sub(reserveInput);
-                amountOutput = BakerySwapLibrary.getAmountOut(amountInput, reserveInput, reserveOutput);
+                amountInput = IBEP20(input).balanceOf(address(pair)).sub(
+                    reserveInput
+                );
+                amountOutput = BakerySwapLibrary.getAmountOut(
+                    amountInput,
+                    reserveInput,
+                    reserveOutput
+                );
             }
             (uint256 amount0Out, uint256 amount1Out) = input == token0
                 ? (uint256(0), amountOutput)
                 : (amountOutput, uint256(0));
-            address to = i < path.length - 2 ? BakerySwapLibrary.pairFor(factory, output, path[i + 2]) : _to;
+            address to = i < path.length - 2
+                ? BakerySwapLibrary.pairFor(factory, output, path[i + 2])
+                : _to;
             pair.swap(amount0Out, amount1Out, to);
         }
     }
@@ -1158,8 +1430,9 @@ contract BakerySwapRouter is IBakerySwapRouter {
         uint256 balanceBefore = IBEP20(path[path.length - 1]).balanceOf(to);
         _swapSupportingFeeOnTransferTokens(path, to);
         require(
-            IBEP20(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >= amountOutMin,
-            'BakerySwapRouter: INSUFFICIENT_OUTPUT_AMOUNT'
+            IBEP20(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >=
+                amountOutMin,
+            "BakerySwapRouter: INSUFFICIENT_OUTPUT_AMOUNT"
         );
     }
 
@@ -1168,16 +1441,22 @@ contract BakerySwapRouter is IBakerySwapRouter {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external virtual override payable ensure(deadline) {
-        require(path[0] == WBNB, 'BakerySwapRouter: INVALID_PATH');
+    ) external payable virtual override ensure(deadline) {
+        require(path[0] == WBNB, "BakerySwapRouter: INVALID_PATH");
         uint256 amountIn = msg.value;
         IWBNB(WBNB).deposit{value: amountIn}();
-        assert(IWBNB(WBNB).transfer(BakerySwapLibrary.pairFor(factory, path[0], path[1]), amountIn));
+        assert(
+            IWBNB(WBNB).transfer(
+                BakerySwapLibrary.pairFor(factory, path[0], path[1]),
+                amountIn
+            )
+        );
         uint256 balanceBefore = IBEP20(path[path.length - 1]).balanceOf(to);
         _swapSupportingFeeOnTransferTokens(path, to);
         require(
-            IBEP20(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >= amountOutMin,
-            'BakerySwapRouter: INSUFFICIENT_OUTPUT_AMOUNT'
+            IBEP20(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >=
+                amountOutMin,
+            "BakerySwapRouter: INSUFFICIENT_OUTPUT_AMOUNT"
         );
     }
 
@@ -1188,7 +1467,10 @@ contract BakerySwapRouter is IBakerySwapRouter {
         address to,
         uint256 deadline
     ) external virtual override ensure(deadline) {
-        require(path[path.length - 1] == WBNB, 'BakerySwapRouter: INVALID_PATH');
+        require(
+            path[path.length - 1] == WBNB,
+            "BakerySwapRouter: INVALID_PATH"
+        );
         TransferHelper.safeTransferFrom(
             path[0],
             msg.sender,
@@ -1197,7 +1479,10 @@ contract BakerySwapRouter is IBakerySwapRouter {
         );
         _swapSupportingFeeOnTransferTokens(path, address(this));
         uint256 amountOut = IBEP20(WBNB).balanceOf(address(this));
-        require(amountOut >= amountOutMin, 'BakerySwapRouter: INSUFFICIENT_OUTPUT_AMOUNT');
+        require(
+            amountOut >= amountOutMin,
+            "BakerySwapRouter: INSUFFICIENT_OUTPUT_AMOUNT"
+        );
         IWBNB(WBNB).withdraw(amountOut);
         TransferHelper.safeTransferBNB(to, amountOut);
     }
@@ -1207,7 +1492,7 @@ contract BakerySwapRouter is IBakerySwapRouter {
         uint256 amountA,
         uint256 reserveA,
         uint256 reserveB
-    ) public virtual override pure returns (uint256 amountB) {
+    ) public pure virtual override returns (uint256 amountB) {
         return BakerySwapLibrary.quote(amountA, reserveA, reserveB);
     }
 
@@ -1215,7 +1500,7 @@ contract BakerySwapRouter is IBakerySwapRouter {
         uint256 amountIn,
         uint256 reserveIn,
         uint256 reserveOut
-    ) public virtual override pure returns (uint256 amountOut) {
+    ) public pure virtual override returns (uint256 amountOut) {
         return BakerySwapLibrary.getAmountOut(amountIn, reserveIn, reserveOut);
     }
 
@@ -1223,15 +1508,15 @@ contract BakerySwapRouter is IBakerySwapRouter {
         uint256 amountOut,
         uint256 reserveIn,
         uint256 reserveOut
-    ) public virtual override pure returns (uint256 amountIn) {
+    ) public pure virtual override returns (uint256 amountIn) {
         return BakerySwapLibrary.getAmountIn(amountOut, reserveIn, reserveOut);
     }
 
     function getAmountsOut(uint256 amountIn, address[] memory path)
         public
+        view
         virtual
         override
-        view
         returns (uint256[] memory amounts)
     {
         return BakerySwapLibrary.getAmountsOut(factory, amountIn, path);
@@ -1239,9 +1524,9 @@ contract BakerySwapRouter is IBakerySwapRouter {
 
     function getAmountsIn(uint256 amountOut, address[] memory path)
         public
+        view
         virtual
         override
-        view
         returns (uint256[] memory amounts)
     {
         return BakerySwapLibrary.getAmountsIn(factory, amountOut, path);
