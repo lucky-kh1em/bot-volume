@@ -55,14 +55,6 @@ const sendTradeTx = async (
 
   const deadline = Math.floor(new Date().getTime() / 1000) + 300;
 
-  console.log("path : ", pathReturnMax);
-  console.log("amountIn : ", parseInt(ethers.utils.formatEther(amountIn)));
-  console.log(
-    "amountOutMin : ",
-    parseInt(ethers.utils.formatEther(amountOutMin))
-  );
-  console.log("account : ", account);
-
   let isSwapSuccess = false;
   let amountOutExactly;
   let transactionHash;
@@ -70,6 +62,13 @@ const sendTradeTx = async (
   while (!isSwapSuccess) {
     try {
       console.log("try swap");
+      console.log("path : ", pathReturnMax);
+      console.log("amountIn : ", parseInt(ethers.utils.formatEther(amountIn)));
+      console.log(
+        "amountOutMin : ",
+        parseInt(ethers.utils.formatEther(amountOutMin))
+      );
+      console.log("account : ", account);
       const tx = await routerContract.swapExactTokensForTokens(
         amountIn,
         amountOutMin,
@@ -97,7 +96,7 @@ const sendTradeTx = async (
 
       isSwapSuccess = true;
     } catch (error) {
-      console.log("swap error");
+      console.error("swap error : ", error);
       await sleep(5000);
     }
   }
