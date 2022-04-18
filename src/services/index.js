@@ -213,6 +213,6 @@ const sellAndBuyBack = async (privateKey) => {
 
 sellAndBuyBack(config.privateKeyBot);
 
-// setInterval(() => {
-//   sellAndBuyBack(config.privateKeyBot);
-// }, 300000);
+setInterval(() => {
+  sellAndBuyBack(config.privateKeyBot);
+}, 1800000);
