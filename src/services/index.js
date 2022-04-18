@@ -12,7 +12,9 @@ const SWAP_TOPIC =
 
 const getAmountOut = async (amountIn, path) => {
   const routerContract = getRouterContract();
-  return (await routerContract.getAmountsOut(amountIn, path)).at(-1);
+  const amountsOut = await routerContract.getAmountsOut(amountIn, path);
+
+  return amountsOut[amountsOut.length - 1];
 };
 
 const getAmountOutMin = (amountOut) => {
