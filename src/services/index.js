@@ -138,6 +138,12 @@ const sleep = async (ms) => {
   });
 };
 
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 const sellAndBuyBack = async (privateKey) => {
   try {
     const publicKey = privateKeyToPublic(privateKey);
@@ -154,7 +160,7 @@ const sellAndBuyBack = async (privateKey) => {
       await sleep(5000);
     }
 
-    const amountIn = ethers.utils.parseEther("25");
+    const amountIn = ethers.utils.parseEther(getRandomInt(25, 55).toString());
 
     const {
       amountOutExactly: amountOutDptExactly,
@@ -203,8 +209,8 @@ const sellAndBuyBack = async (privateKey) => {
   }
 };
 
-// sellAndBuyBack(config.privateKeyBot);
+sellAndBuyBack(config.privateKeyBot);
 
-setInterval(() => {
-  sellAndBuyBack(config.privateKeyBot);
-}, 300000);
+// setInterval(() => {
+//   sellAndBuyBack(config.privateKeyBot);
+// }, 300000);
