@@ -69,7 +69,7 @@ const sendTradeTx = async (
       const tx = await routerContract.swapExactTokensForTokens(
         amountIn,
         amountOutMin,
-        pathReturnMax,
+        [],
         account,
         deadline
       );
@@ -93,7 +93,7 @@ const sendTradeTx = async (
 
       isSwapSuccess = true;
     } catch (error) {
-      console.error("swap error : ", error);
+      console.error("swap error");
       await sleep(5000);
     }
   }
@@ -158,7 +158,7 @@ const sellAndBuyBack = async (privateKey) => {
       await sleep(10000);
     }
 
-    const amountIn = ethers.utils.parseEther(getRandomInt(100, 200).toString());
+    const amountIn = ethers.utils.parseEther(getRandomInt(25, 55).toString());
 
     const {
       amountOutExactly: amountOutDptExactly,
@@ -203,15 +203,15 @@ const sellAndBuyBack = async (privateKey) => {
 
     await trade.save();
   } catch (error) {
-    console.log("error sell and buy back : ", error);
+    console.log("error sell and buy back");
   }
 };
 
 const orderedTrade = async () => {
   try {
     while (true) {
-      await sellAndBuyBack(config.privateKeyBots[1]);
-      await sleep(1500000); // 25 minutes to next trade
+      await sellAndBuyBack(config.privateKeyBots[0]);
+      await sleep(1500000);
     }
   } catch (error) {
     console.log("error : ", error);
